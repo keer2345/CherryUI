@@ -20,7 +20,8 @@ export function login(data: LoginData): AxiosPromise<LoginResult> {
     url: '/auth/login',
     headers: {
       isToken: false,
-      isEncrypt: true,
+      // isEncrypt: true,
+      isEncrypt: false,
       repeatSubmit: false
     },
     method: 'post',
