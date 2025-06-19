@@ -1,4 +1,4 @@
-import {DeptTreeVO, DeptVO} from './../dept/types';
+import { DeptTreeVO, DeptVO } from './../dept/types';
 import { RoleVO } from '@/api/system/role/types';
 import request from '@/utils/request';
 import { AxiosPromise } from 'axios';
@@ -146,7 +146,7 @@ export const updateUserPwd = (oldPassword: string, newPassword: string) => {
     url: '/system/user/profile/updatePwd',
     method: 'put',
     headers: {
-      isEncrypt: true,
+      isEncrypt: false,
       repeatSubmit: false
     },
     data: data
