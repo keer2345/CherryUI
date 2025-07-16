@@ -137,7 +137,7 @@
 
           <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="50" align="center" />
-            <el-table-column v-if="columns[0].visible" key="userId" label="用户编号" align="center" prop="userId" />
+            <el-table-column v-if="columns[0].visible" key="id" label="用户编号" align="center" prop="id" />
             <el-table-column
               v-if="columns[1].visible"
               key="userName"
@@ -189,7 +189,7 @@
 
             <el-table-column label="操作" fixed="right" width="180" class-name="small-padding fixed-width">
               <template #default="scope">
-                <el-tooltip v-if="scope.row.userId !== 1" content="修改" placement="top">
+                <el-tooltip v-if="scope.row.id !== 1" content="修改" placement="top">
                   <el-button
                     v-hasPermi="['system:user:edit']"
                     link
@@ -198,7 +198,7 @@
                     @click="handleUpdate(scope.row)"
                   ></el-button>
                 </el-tooltip>
-                <el-tooltip v-if="scope.row.userId !== 1" content="删除" placement="top">
+                <el-tooltip v-if="scope.row.id !== 1" content="删除" placement="top">
                   <el-button
                     v-hasPermi="['system:user:remove']"
                     link
@@ -208,7 +208,7 @@
                   ></el-button>
                 </el-tooltip>
 
-                <el-tooltip v-if="scope.row.userId !== 1" content="重置密码" placement="top">
+                <el-tooltip v-if="scope.row.id !== 1" content="重置密码" placement="top">
                   <el-button
                     v-hasPermi="['system:user:resetPwd']"
                     link
@@ -218,7 +218,7 @@
                   ></el-button>
                 </el-tooltip>
 
-                <el-tooltip v-if="scope.row.userId !== 1" content="分配角色" placement="top">
+                <el-tooltip v-if="scope.row.id !== 1" content="分配角色" placement="top">
                   <el-button
                     v-hasPermi="['system:user:edit']"
                     link
@@ -286,12 +286,12 @@
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item v-if="form.userId == undefined" label="用户名称" prop="userName">
+            <el-form-item v-if="form.id == undefined" label="用户名称" prop="userName">
               <el-input v-model="form.userName" placeholder="请输入用户名称" maxlength="30" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item v-if="form.userId == undefined" label="用户密码" prop="password">
+            <el-form-item v-if="form.id == undefined" label="用户密码" prop="password">
               <el-input
                 v-model="form.password"
                 placeholder="请输入用户密码"
@@ -331,9 +331,9 @@
               <el-select v-model="form.postIds" multiple placeholder="请选择">
                 <el-option
                   v-for="item in postOptions"
-                  :key="item.postId"
+                  :key="item.id"
                   :label="item.postName"
-                  :value="item.postId"
+                  :value="item.id"
                   :disabled="item.status == '1'"
                 ></el-option>
               </el-select>
@@ -344,9 +344,9 @@
               <el-select v-model="form.roleIds" filterable multiple placeholder="请选择">
                 <el-option
                   v-for="item in roleOptions"
-                  :key="item.roleId"
+                  :key="item.id"
                   :label="item.roleName"
-                  :value="item.roleId"
+                  :value="item.id"
                   :disabled="item.status == '1'"
                 ></el-option>
               </el-select>
@@ -423,7 +423,6 @@ import { to } from 'await-to-js';
 import { optionselect } from '@/api/system/post';
 import { hasPermi } from '@/directive/permission';
 import { checkPermi } from '@/utils/permission';
-import { convertColumnName } from '@/utils/convert';
 
 const router = useRouter();
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
@@ -480,7 +479,7 @@ const dialog = reactive<DialogOption>({
 });
 
 const initFormData: UserForm = {
-  userId: undefined,
+  id: undefined,
   deptId: undefined,
   userName: '',
   nickName: undefined,
@@ -567,10 +566,8 @@ const getList = async () => {
   loading.value = true;
   const res = await api.listUser(proxy?.addDateRange(queryParams.value, dateRange.value));
   loading.value = false;
-
-  // const rows = _.map(res.rows, (item) => _.mapKeys(item, (value, key) => (key === 'id' ? 'userId' : key)));
-  // userList.value = rows;
-  userList.value = convertColumnName(res.rows, 'id', 'userId');
+  // userList.value = convertColumnName(res.rows, 'id', 'userId');
+  userList.value = res.rows;
   total.value = res.total;
 };
 
@@ -617,7 +614,7 @@ const resetQuery = () => {
 
 /** 删除按钮操作 */
 const handleDelete = async (row?: UserVO) => {
-  const userIds = row?.userId || ids.value;
+  const userIds = row?.id || ids.value;
   const [err] = await to(proxy?.$modal.confirm('是否确认删除用户编号为"' + userIds + '"的数据项？') as any);
   if (!err) {
     await api.delUser(userIds);
@@ -631,7 +628,7 @@ const handleStatusChange = async (row: UserVO) => {
   let text = row.status === '0' ? '启用' : '停用';
   try {
     await proxy?.$modal.confirm('确认要"' + text + '""' + row.userName + '"用户吗?');
-    await api.changeUserStatus(row.userId, row.status);
+    await api.changeUserStatus(row.id, row.status);
     proxy?.$modal.msgSuccess(text + '成功');
   } catch (err) {
     row.status = row.status === '0' ? '1' : '0';
@@ -639,7 +636,7 @@ const handleStatusChange = async (row: UserVO) => {
 };
 /** 跳转角色分配 */
 const handleAuthRole = (row: UserVO) => {
-  const userId = row.userId;
+  const userId = row.id;
   router.push('/system/user-auth/role/' + userId);
 };
 
@@ -660,14 +657,14 @@ const handleResetPwd = async (row: UserVO) => {
     })
   );
   if (!err && res) {
-    await api.resetUserPwd(row.userId, res.value);
+    await api.resetUserPwd(row.id, res.value);
     proxy?.$modal.msgSuccess('修改成功，新密码是：' + res.value);
   }
 };
 
 /** 选择条数  */
 const handleSelectionChange = (selection: UserVO[]) => {
-  ids.value = selection.map((item) => item.userId);
+  ids.value = selection.map((item) => item.id);
   single.value = selection.length != 1;
   multiple.value = !selection.length;
 };
@@ -741,7 +738,7 @@ const handleAdd = async () => {
 /** 修改按钮操作 */
 const handleUpdate = async (row?: UserForm) => {
   reset();
-  const userId = row?.userId || ids.value[0];
+  const userId = row?.id || ids.value[0];
   const { data } = await api.getUser(userId);
   dialog.visible = true;
   dialog.title = '修改用户';
@@ -757,7 +754,7 @@ const handleUpdate = async (row?: UserForm) => {
 const submitForm = () => {
   userFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
-      form.value.userId ? await api.updateUser(form.value) : await api.addUser(form.value);
+      form.value.id ? await api.updateUser(form.value) : await api.addUser(form.value);
       proxy?.$modal.msgSuccess('操作成功');
       dialog.visible = false;
       await getList();

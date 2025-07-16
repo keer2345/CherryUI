@@ -1,5 +1,6 @@
 export interface PostVO extends BaseEntity {
-  postId: number | string;
+  // postId: number | string;
+  id: number | string;
   deptId: number | string;
   postCode: string;
   postName: string;
