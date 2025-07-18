@@ -77,9 +77,9 @@ export const delUser = (userId: Array<string | number> | string | number) => {
  * @param userId 用户ID
  * @param password 密码
  */
-export const resetUserPwd = (userId: string | number, password: string) => {
+export const resetUserPwd = (id: string | number, password: string) => {
   const data = {
-    userId,
+    id,
     password
   };
   return request({
@@ -95,12 +95,12 @@ export const resetUserPwd = (userId: string | number, password: string) => {
 
 /**
  * 用户状态修改
- * @param userId 用户ID
+ * @param id 用户ID
  * @param status 用户状态
  */
-export const changeUserStatus = (userId: number | string, status: string) => {
+export const changeUserStatus = (id: number | string, status: string) => {
   const data = {
-    userId,
+    id,
     status
   };
   return request({

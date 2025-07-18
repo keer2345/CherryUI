@@ -566,7 +566,6 @@ const getList = async () => {
   loading.value = true;
   const res = await api.listUser(proxy?.addDateRange(queryParams.value, dateRange.value));
   loading.value = false;
-  // userList.value = convertColumnName(res.rows, 'id', 'userId');
   userList.value = res.rows;
   total.value = res.total;
 };
