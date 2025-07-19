@@ -423,6 +423,7 @@ import { to } from 'await-to-js';
 import { optionselect } from '@/api/system/post';
 import { hasPermi } from '@/directive/permission';
 import { checkPermi } from '@/utils/permission';
+import { useGetDerivedNamespace } from 'element-plus';
 
 const router = useRouter();
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
@@ -431,6 +432,7 @@ const userList = ref<UserVO[]>();
 const loading = ref(true);
 const showSearch = ref(true);
 const ids = ref<Array<number | string>>([]);
+const userNames = ref<Array<number | string>>([]);
 const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
@@ -614,7 +616,8 @@ const resetQuery = () => {
 /** 删除按钮操作 */
 const handleDelete = async (row?: UserVO) => {
   const userIds = row?.id || ids.value;
-  const [err] = await to(proxy?.$modal.confirm('是否确认删除用户编号为"' + userIds + '"的数据项？') as any);
+  const names = row?.userName || userNames.value;
+  const [err] = await to(proxy?.$modal.confirm('是否确认删除用户"' + names + '"的数据项？') as any);
   if (!err) {
     await api.delUser(userIds);
     await getList();
@@ -626,7 +629,7 @@ const handleDelete = async (row?: UserVO) => {
 const handleStatusChange = async (row: UserVO) => {
   let text = row.status === '0' ? '启用' : '停用';
   try {
-    await proxy?.$modal.confirm('确认要"' + text + '""' + row.userName + '"用户吗?');
+    await proxy?.$modal.confirm('确认要 ' + text + ' "' + row.userName + '"用户吗?');
     await api.changeUserStatus(row.id, row.status);
     proxy?.$modal.msgSuccess(text + '成功');
   } catch (err) {
@@ -664,6 +667,7 @@ const handleResetPwd = async (row: UserVO) => {
 /** 选择条数  */
 const handleSelectionChange = (selection: UserVO[]) => {
   ids.value = selection.map((item) => item.id);
+  userNames.value = selection.map((item) => item.userName);
   single.value = selection.length != 1;
   multiple.value = !selection.length;
 };
