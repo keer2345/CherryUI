@@ -146,7 +146,7 @@ export const updateUserPwd = (oldPassword: string, newPassword: string) => {
     url: '/system/user/profile/updatePwd',
     method: 'put',
     headers: {
-      isEncrypt: false,
+      isEncrypt: true,
       repeatSubmit: false
     },
     data: data
