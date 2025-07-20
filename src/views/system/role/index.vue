@@ -116,7 +116,7 @@
 
         <el-table-column fixed="right" label="操作" width="180">
           <template #default="scope">
-            <el-tooltip v-if="scope.row.roleId !== 1" content="修改" placement="top">
+            <el-tooltip v-if="scope.row.id !== 1" content="修改" placement="top">
               <el-button
                 v-hasPermi="['system:role:edit']"
                 link
@@ -125,7 +125,7 @@
                 @click="handleUpdate(scope.row)"
               ></el-button>
             </el-tooltip>
-            <el-tooltip v-if="scope.row.roleId !== 1" content="删除" placement="top">
+            <el-tooltip v-if="scope.row.id !== 1" content="删除" placement="top">
               <el-button
                 v-hasPermi="['system:role:remove']"
                 link
@@ -134,7 +134,7 @@
                 @click="handleDelete(scope.row)"
               ></el-button>
             </el-tooltip>
-            <el-tooltip v-if="scope.row.roleId !== 1" content="数据权限" placement="top">
+            <el-tooltip v-if="scope.row.id !== 1" content="数据权限" placement="top">
               <el-button
                 v-hasPermi="['system:role:edit']"
                 link
@@ -143,7 +143,7 @@
                 @click="handleDataScope(scope.row)"
               ></el-button>
             </el-tooltip>
-            <el-tooltip v-if="scope.row.roleId !== 1" content="分配用户" placement="top">
+            <el-tooltip v-if="scope.row.id !== 1" content="分配用户" placement="top">
               <el-button
                 v-hasPermi="['system:role:edit']"
                 link
@@ -324,7 +324,7 @@ const menuRef = ref<ElTreeInstance>();
 const deptRef = ref<ElTreeInstance>();
 
 const initForm: RoleForm = {
-  roleId: undefined,
+  id: undefined,
   roleSort: 1,
   status: '0',
   roleName: '',
@@ -387,8 +387,9 @@ const resetQuery = () => {
 };
 /**删除按钮操作 */
 const handleDelete = async (row?: RoleVO) => {
-  const roleids = row?.roleId || ids.value;
-  await proxy?.$modal.confirm('是否确认删除角色编号为' + roleids + '数据项目');
+  const roleids = row?.id || ids.value;
+  const names = row?.roleName || roleNames.value;
+  await proxy?.$modal.confirm('是否确认删除为' + names + '数据项目');
   await delRole(roleids);
   getList();
   proxy?.$modal.msgSuccess('删除成功');
@@ -406,7 +407,8 @@ const handleExport = () => {
 };
 /** 多选框选中数据 */
 const handleSelectionChange = (selection: RoleVO[]) => {
-  ids.value = selection.map((item: RoleVO) => item.roleId);
+  ids.value = selection.map((item: RoleVO) => item.id);
+  roleNames.value = selection.map((item: RoleVO) => item.roleName);
   single.value = selection.length != 1;
   multiple.value = !selection.length;
 };
@@ -415,8 +417,8 @@ const handleSelectionChange = (selection: RoleVO[]) => {
 const handleStatusChange = async (row: RoleVO) => {
   let text = row.status === '0' ? '启用' : '停用';
   try {
-    await proxy?.$modal.confirm('确认要"' + text + '""' + row.roleName + '"角色吗?');
-    await changeRoleStatus(row.roleId, row.status);
+    await proxy?.$modal.confirm('确认要 ' + text + ' "' + row.roleName + '"角色吗?');
+    await changeRoleStatus(row.id, row.status);
     proxy?.$modal.msgSuccess(text + '成功');
   } catch {
     row.status = row.status === '0' ? '1' : '0';
@@ -425,7 +427,7 @@ const handleStatusChange = async (row: RoleVO) => {
 
 /** 分配用户 */
 const handleAuthUser = (row: RoleVO) => {
-  router.push('/system/role-auth/user/' + row.roleId);
+  router.push('/system/role-auth/user/' + row.id);
 };
 
 /** 查询菜单树结构 */
@@ -465,7 +467,7 @@ const handleAdd = () => {
 /** 修改角色 */
 const handleUpdate = async (row?: RoleVO) => {
   reset();
-  const roleId = row?.roleId || ids.value[0];
+  const roleId = row?.id || ids.value[0];
   const { data } = await getRole(roleId);
   Object.assign(form.value, data);
   form.value.roleSort = Number(form.value.roleSort);
@@ -541,7 +543,7 @@ const submitForm = () => {
   roleFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       form.value.menuIds = getMenuAllCheckedKeys();
-      form.value.roleId ? await updateRole(form.value) : await addRole(form.value);
+      form.value.id ? await updateRole(form.value) : await addRole(form.value);
       proxy?.$modal.msgSuccess('操作成功');
       dialog.visible = false;
       getList();
@@ -561,9 +563,9 @@ const dataScopeSelectChange = (value: string) => {
 };
 /** 分配数据权限操作 */
 const handleDataScope = async (row: RoleVO) => {
-  const response = await getRole(row.roleId);
+  const response = await getRole(row.id);
   Object.assign(form.value, response.data);
-  const res = await getRoleDeptTreeSelect(row.roleId);
+  const res = await getRoleDeptTreeSelect(row.id);
   openDataScope.value = true;
   dialog.title = '分配数据权限';
   await nextTick(() => {
@@ -572,7 +574,7 @@ const handleDataScope = async (row: RoleVO) => {
 };
 /** 提交按钮（数据权限） */
 const submitDataScope = async () => {
-  if (form.value.roleId) {
+  if (form.value.id) {
     form.value.deptIds = getDeptAllCheckedKeys();
     await dataScope(form.value);
     proxy?.$modal.msgSuccess('修改成功');

@@ -70,9 +70,9 @@ export const dataScope = (data: any) => {
 /**
  * 角色状态修改
  */
-export const changeRoleStatus = (roleId: string | number, status: string) => {
+export const changeRoleStatus = (id: string | number, status: string) => {
   const data = {
-    roleId,
+    id,
     status
   };
   return request({
