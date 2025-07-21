@@ -295,6 +295,7 @@ const roleList = ref<RoleVO[]>();
 const loading = ref(true);
 const showSearch = ref(true);
 const ids = ref<Array<string | number>>([]);
+const roleNames = ref<Array<string | number>>([]);
 const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
@@ -389,7 +390,7 @@ const resetQuery = () => {
 const handleDelete = async (row?: RoleVO) => {
   const roleids = row?.id || ids.value;
   const names = row?.roleName || roleNames.value;
-  await proxy?.$modal.confirm('是否确认删除为' + names + '数据项目');
+  await proxy?.$modal.confirm('是否确认删除为 "' + names + '" 数据项目');
   await delRole(roleids);
   getList();
   proxy?.$modal.msgSuccess('删除成功');
